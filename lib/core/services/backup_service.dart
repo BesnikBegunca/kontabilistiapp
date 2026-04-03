@@ -27,6 +27,20 @@ class BackupService {
       ],
     );
     if (file == null) return false;
+
+    final selected = File(file.path);
+    if (!await selected.exists()) return false;
+    if (await selected.length() < 2048) return false;
+
+    try {
+      final bytes = await selected.openRead(0, 64).fold<List<int>>([], (a, b) => a..addAll(b));
+      final text = String.fromCharCodes(bytes);
+      final probablySqlite = text.contains('SQLite format 3') || file.path.endsWith('.db') || file.path.endsWith('.sqlite');
+      if (!probablySqlite) return false;
+    } catch (_) {
+      return false;
+    }
+
     return AppDatabase.replaceDatabaseFrom(file.path);
   }
 }

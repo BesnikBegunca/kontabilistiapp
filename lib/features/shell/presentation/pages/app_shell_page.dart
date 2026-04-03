@@ -14,7 +14,9 @@ class AppShellPage extends ConsumerWidget {
     _NavItem('Firma', Icons.apartment_rounded, '/firma'),
     _NavItem('Users', Icons.people_alt_rounded, '/users'),
     _NavItem('Customers', Icons.groups_rounded, '/customers'),
+    _NavItem('Customer Balances', Icons.stacked_bar_chart_rounded, '/customer-balances'),
     _NavItem('Suppliers', Icons.local_shipping_rounded, '/suppliers'),
+    _NavItem('Supplier Balances', Icons.bar_chart_rounded, '/supplier-balances'),
     _NavItem('Items', Icons.inventory_2_rounded, '/items'),
     _NavItem('Outgoing Invoices', Icons.receipt_long_rounded, '/outgoing-invoices'),
     _NavItem('Incoming Invoices', Icons.request_quote_rounded, '/incoming-invoices'),
@@ -23,6 +25,7 @@ class AppShellPage extends ConsumerWidget {
     _NavItem('Bank', Icons.account_balance_rounded, '/bank'),
     _NavItem('Expenses', Icons.money_off_csred_rounded, '/expenses'),
     _NavItem('Reports', Icons.assessment_rounded, '/reports'),
+    _NavItem('Audit Logs', Icons.history_rounded, '/audit-logs'),
     _NavItem('Settings', Icons.settings_rounded, '/settings'),
     _NavItem('Backup', Icons.backup_rounded, '/backup'),
   ];
@@ -37,9 +40,7 @@ class AppShellPage extends ConsumerWidget {
           Container(
             width: AppConstants.sidebarWidth,
             padding: const EdgeInsets.all(18),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0E1C3D),
-            ),
+            decoration: const BoxDecoration(color: Color(0xFF0E1C3D)),
             child: Column(
               children: [
                 Container(
@@ -67,9 +68,8 @@ class AppShellPage extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final item = _items[index];
                       final isActive = GoRouterState.of(context).matchedLocation == item.route;
-                      final isViewerLocked = user?.role == UserRole.viewer &&
-                          const ['/firma', '/settings'].contains(item.route) == false &&
-                          item.route != '/dashboard';
+                      final viewerLockedRoutes = ['/users', '/settings', '/backup', '/audit-logs'];
+                      final isViewerLocked = user?.role == UserRole.viewer && viewerLockedRoutes.contains(item.route);
                       return Opacity(
                         opacity: isViewerLocked ? 0.45 : 1,
                         child: ListTile(
@@ -85,10 +85,7 @@ class AppShellPage extends ConsumerWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.08),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(.08), borderRadius: BorderRadius.circular(20)),
                   child: Row(
                     children: [
                       const CircleAvatar(child: Icon(Icons.person)),
@@ -122,32 +119,15 @@ class AppShellPage extends ConsumerWidget {
                 Container(
                   height: 78,
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    border: Border(bottom: BorderSide(color: Color(0xFFE9EEF7))),
-                  ),
+                  decoration: const BoxDecoration(color: Colors.white, border: Border(bottom: BorderSide(color: Color(0xFFE9EEF7)))),
                   child: Row(
                     children: [
-                      const Expanded(
-                        child: Text(
-                          'Professional desktop accounting workspace',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      FilledButton.icon(
-                        onPressed: () => context.go('/settings'),
-                        icon: const Icon(Icons.tune_rounded),
-                        label: const Text('System settings'),
-                      ),
+                      const Expanded(child: Text('Professional desktop accounting workspace', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
+                      FilledButton.icon(onPressed: () => context.go('/settings'), icon: const Icon(Icons.tune_rounded), label: const Text('System settings')),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: child,
-                  ),
-                ),
+                Expanded(child: Padding(padding: const EdgeInsets.all(24), child: child)),
               ],
             ),
           ),

@@ -4,6 +4,8 @@ import '../../../../domain/entities/app_settings.dart';
 import '../../../../shared/widgets/page_header.dart';
 import '../../../../shared/widgets/section_card.dart';
 import '../providers/settings_controller.dart';
+import '../providers/theme_mode_provider.dart';
+import 'document_numbering_page.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -35,6 +37,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         _vatCtrl.text = settings.defaultVatRate.toString();
         _backupCtrl.text = settings.backupFolderPath ?? '';
         _themeMode = settings.themeMode;
+        ref.read(appThemeModeProvider.notifier).state = _themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light;
         if (mounted) setState(() {});
       }
     });
@@ -62,10 +65,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       updatedAt: DateTime.now(),
     );
     await ref.read(settingsControllerProvider.notifier).save(settings);
+    ref.read(appThemeModeProvider.notifier).state = _themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light;
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings u ruajten me sukses.')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Settings u ruajten me sukses.')));
   }
 
   @override
@@ -91,8 +93,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       spacing: 16,
                       runSpacing: 16,
                       children: [
-                        _field(_prefixCtrl, 'Invoice prefix'),
-                        _field(_nextNoCtrl, 'Next invoice number', number: true),
+                        _field(_prefixCtrl, 'Legacy invoice prefix'),
+                        _field(_nextNoCtrl, 'Legacy next invoice number', number: true),
                         _field(_currencyCtrl, 'Currency'),
                         _field(_vatCtrl, 'Default VAT rate', number: true),
                         _field(_backupCtrl, 'Backup folder path'),
@@ -103,18 +105,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       initialValue: _themeMode,
                       items: const [
                         DropdownMenuItem(value: 'light', child: Text('Light')),
-                        DropdownMenuItem(value: 'dark', child: Text('Dark (reserved for next phase)')),
+                        DropdownMenuItem(value: 'dark', child: Text('Dark')),
                       ],
                       onChanged: (value) => setState(() => _themeMode = value ?? 'light'),
                       decoration: const InputDecoration(labelText: 'Theme mode'),
                     ),
                     const SizedBox(height: 20),
-                    Row(
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
                       children: [
                         ElevatedButton.icon(
                           onPressed: state.isLoading ? null : _save,
                           icon: const Icon(Icons.save_rounded),
                           label: Text(state.isLoading ? 'Saving...' : 'Save settings'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DocumentNumberingPage()));
+                          },
+                          icon: const Icon(Icons.tag_rounded),
+                          label: const Text('Document numbering'),
                         ),
                       ],
                     ),
